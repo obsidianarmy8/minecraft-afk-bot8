@@ -3,18 +3,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const dgram = require('dgram');
 
-// --- FIXED TARGET SETTING ---
-const TARGET_USER = ".Theobsidianarmy";
-
-// 1. Render Keep-Alive Link
+// 1. Keep the Render Web Service Awake
 app.get('/', (req, res) => {
-    res.send('minecart-afk-bot8 anti-kick protocol is active!');
+    res.send('minecart-afk-bot8 farm loader is active!');
 });
 app.listen(PORT, () => {
     console.log(`Web portal listening on port ${PORT}`);
 });
 
-// 2. Start Bedrock Session
+// 2. Start Bedrock Connection
 function joinDonutSMP() {
     console.log("Connecting minecart-afk-bot8 to DonutSMP...");
     const client = dgram.createSocket('udp4');
@@ -27,36 +24,16 @@ function joinDonutSMP() {
 
     client.on('message', (msg) => {
         const dataStr = msg.toString().toLowerCase(); 
-        const checkUser = TARGET_USER.toLowerCase();
         
         if (dataStr.includes('mcpe')) {
             console.log("minecart-afk-bot8 logged into world.");
             
-            // Auto-teleport the bot to your farm chunk right away
+            // Teleport your bot straight to the farm chunk
             setTimeout(() => {
                 sendChat(client, '/home waterbucketfarmm');
                 sendChat(client, '/home "water bucket farm"');
                 console.log("Sent initial farm destination commands.");
             }, 8000);
-
-            // --- ANTI-KICK MOVEMENT PACKET LOOP ---
-            // Sends a minor physics update packet every 4 seconds so the server keeps it online
-            setInterval(() => {
-                const movePacket = Buffer.from(JSON.stringify({ type: 'move', x: 0, y: 0.1, z: 0, yaw: 1, pitch: 1 }));
-                client.send(movePacket, 0, movePacket.length, 19132, 'donutsmp.net');
-            }, 4000);
-        }
-
-        // --- SPECIFIC TPA ACCEPT FOR TARGET ---
-        const isRequest = dataStr.includes('tpa') || dataStr.includes('teleport request') || dataStr.includes('requested to teleport');
-
-        if (isRequest && dataStr.includes(checkUser)) {
-            console.log(`Detected request from ${TARGET_USER}! Running accept command...`);
-            
-            setTimeout(() => {
-                sendChat(client, `/tpaccept ${TARGET_USER}`);
-                console.log(`Successfully sent: /tpaccept ${TARGET_USER}`);
-            }, 1000); 
         }
     });
 
@@ -75,6 +52,6 @@ function sendChat(socketClient, messageText) {
     socketClient.send(chatPacket, 0, chatPacket.length, 19132, 'donutsmp.net');
 }
 
-// Keep connection alive or reconnect every 30 seconds
+// Keep trying connection loop every 30 seconds
 setInterval(joinDonutSMP, 30000);
 joinDonutSMP();
