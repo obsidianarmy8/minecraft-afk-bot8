@@ -3,12 +3,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const dgram = require('dgram');
 
-// --- FIXED USERNAME SETTING ---
+// --- FIXED TARGET SETTING ---
 const TARGET_USER = ".Theobsidianarmy";
 
 // 1. Render Keep-Alive Link
 app.get('/', (req, res) => {
-    res.send('minecart-afk-bot8 auto-accept portal is active!');
+    res.send('minecart-afk-bot8 anti-kick protocol is active!');
 });
 app.listen(PORT, () => {
     console.log(`Web portal listening on port ${PORT}`);
@@ -38,6 +38,13 @@ function joinDonutSMP() {
                 sendChat(client, '/home "water bucket farm"');
                 console.log("Sent initial farm destination commands.");
             }, 8000);
+
+            // --- ANTI-KICK MOVEMENT PACKET LOOP ---
+            // Sends a minor physics update packet every 4 seconds so the server keeps it online
+            setInterval(() => {
+                const movePacket = Buffer.from(JSON.stringify({ type: 'move', x: 0, y: 0.1, z: 0, yaw: 1, pitch: 1 }));
+                client.send(movePacket, 0, movePacket.length, 19132, 'donutsmp.net');
+            }, 4000);
         }
 
         // --- SPECIFIC TPA ACCEPT FOR TARGET ---
@@ -46,7 +53,6 @@ function joinDonutSMP() {
         if (isRequest && dataStr.includes(checkUser)) {
             console.log(`Detected request from ${TARGET_USER}! Running accept command...`);
             
-            // The bot forces the accept command specifically for your username
             setTimeout(() => {
                 sendChat(client, `/tpaccept ${TARGET_USER}`);
                 console.log(`Successfully sent: /tpaccept ${TARGET_USER}`);
