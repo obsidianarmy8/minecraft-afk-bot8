@@ -1,3 +1,12 @@
-"dependencies": {
-  "express": "^4.19.2"
+{
+  "name": "minecraft-afk-bot8",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
 }
