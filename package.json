@@ -10,3 +10,8 @@
     "start": "node index.js"
   }
 }
+"dependencies": {
+  "express": "^4.19.2",
+  "mineflayer": "^4.22.0",
+  "prismarine-viewer": "^1.27.0"
+}
