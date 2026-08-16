@@ -11,7 +11,7 @@ const CONFIG = {
   username: 'minecart-afk-bot8',          // bot name
   version: '1.26.40',                     // matches your client
   offline: false,                         // DonutSMP requires Microsoft account
-  homeCommand: '/home water bucket farm', // CHANGE THIS to your exact home name
+  homeCommand: '/home waterbucketfarm', // CHANGE THIS to your exact home name
   antiAfkInterval: 45_000,                // jump every 45 seconds
   reconnectDelay: 10_000
 };
