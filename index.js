@@ -32,3 +32,37 @@ client.on('join', () => {
 
 client.on('error', (err) => console.log(`⚠️ Client Error: ${err}`));
 client.on('close', () => console.log('❌ Connection closed.'));
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+const mineflayer = require('mineflayer');
+const { mineflayer: mineflayerViewer } = require('prismarine-viewer'); 
+
+// 1. Setup the Bot connection
+const bot = mineflayer.createBot({
+    host: 'play.donutsmp.net',
+    username: '', /minecraft-afk-bot8/ <-- Put your bot's Minecraft name here
+    version: '1.20.4' 
+});
+
+// 2. Start the Live View when she spawns
+bot.once('spawn', () => {
+    console.log("Bot spawned on DonutSMP!");
+    
+    // This turns on the live screen viewer
+    mineflayerViewer(bot, { 
+        port: PORT, 
+        firstPerson: true
+    }); 
+    
+    // Teleport her to your farm automatically
+    setTimeout(() => {
+        bot.chat( /home 1 ); // <-- Change "farm" to your exact home name
+    }, 5000);
+});
+
+// 3. Keep-alive route for Render
+app.get('/status', (req, res) => {
+    res.send('Bot web server is running!');
+});
