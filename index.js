@@ -8,12 +8,12 @@ const path = require('path');
 const CONFIG = {
   host: 'donutsmp.net',
   port: 19132,
-  username: 'minecart-afk-bot8',          // bot name
-  version: '1.26.40',                     // matches your client
-  offline: false,                         // DonutSMP requires Microsoft account
-  homeCommand: '/home waterbucketfarm', // CHANGE THIS to your exact home name
-  antiAfkInterval: 45_000,                // jump every 45 seconds
-  reconnectDelay: 10_000
+  username: 'minecart-afk-bot8',
+  version: '1.26.40',
+  offline: false,
+  homeCommand: '/home waterbucketfarm',
+  antiAfkInterval: 45_000,
+  reconnectDelay: 12_000
 };
 
 // ========== STATE ==========
@@ -28,11 +28,12 @@ function log(msg) {
   const line = `[${time}] ${msg}`;
   console.log(line);
   logs.push(line);
-  if (logs.length > 200) logs.shift();
+  if (logs.length > 150) logs.shift();
   broadcast({ type: 'log', message: line });
 }
 
 function broadcast(data) {
+  if (!wss) return;
   wss.clients.forEach(ws => {
     if (ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify(data));
@@ -45,15 +46,14 @@ function sendStatus() {
     type: 'status',
     connected: isConnected,
     username: CONFIG.username,
-    lastSpawn: lastSpawn,
-    uptime: lastSpawn ? Date.now() - lastSpawn : 0
+    lastSpawn: lastSpawn
   });
 }
 
 // ========== BOT ==========
 function connect() {
   if (client) {
-    try { client.close(); } catch {}
+    try { client.close(); } catch (e) {}
   }
 
   log(`Connecting to \( {CONFIG.host}: \){CONFIG.port} as ${CONFIG.username}...`);
@@ -65,24 +65,23 @@ function connect() {
     version: CONFIG.version,
     offline: CONFIG.offline,
     skipPing: true,
-    // profilesFolder: './auth-cache',   // uncomment if you want persistent tokens
     onMsaCode: (data) => {
-      log(`=== MICROSOFT LOGIN REQUIRED ===`);
-      log(`Go to: ${data.verification_uri}`);
-      log(`Enter code: ${data.user_code}`);
-      log(`================================`);
+      log('=== MICROSOFT LOGIN NEEDED ===');
+      log(`Open this link: ${data.verification_uri}`);
+      log(`Enter this code: ${data.user_code}`);
+      log('==============================');
     }
   });
 
   client.on('error', (err) => {
-    log(`Error: ${err.message}`);
+    log(`Error: ${err.message || err}`);
     isConnected = false;
     sendStatus();
     scheduleReconnect();
   });
 
   client.on('kick', (packet) => {
-    log(`Kicked: ${packet.message}`);
+    log(`Kicked: ${packet.message || 'Unknown reason'}`);
     isConnected = false;
     sendStatus();
     scheduleReconnect();
@@ -98,13 +97,13 @@ function connect() {
   client.on('spawn', () => {
     isConnected = true;
     lastSpawn = Date.now();
-    log('Spawned successfully!');
+    log('✅ Spawned successfully!');
     sendStatus();
 
-    // Go to home after a short delay
+    // Go to home
     setTimeout(() => {
-      if (isConnected) {
-        log(`Running: ${CONFIG.homeCommand}`);
+      if (isConnected && client) {
+        log(`Running command: ${CONFIG.homeCommand}`);
         client.queue('text', {
           type: 'chat',
           needs_translation: false,
@@ -115,34 +114,7 @@ function connect() {
           message: CONFIG.homeCommand
         });
       }
-    }, 3000);
-
-    // Simple anti-AFK: jump + look around
-    const antiAfk = setInterval(() => {
-      if (!isConnected || !client) {
-        clearInterval(antiAfk);
-        return;
-      }
-      try {
-        // Jump
-        client.queue('player_auth_input', {
-          pitch: 0,
-          yaw: Math.random() * 360,
-          position: { x: 0, y: 0, z: 0 }, // relative – library handles
-          move_vector: { x: 0, z: 0 },
-          head_yaw: 0,
-          input_data: { jump: true },
-          input_mode: 'mouse',
-          play_mode: 'normal',
-          interaction_model: 'touch',
-          tick: BigInt(Date.now()),
-          delta: { x: 0, y: 0.42, z: 0 } // small upward for jump feel
-        });
-        log('Anti-AFK action (jump/look)');
-      } catch (e) {
-        // some versions need different packet shape – ignore if fails
-      }
-    }, CONFIG.antiAfkInterval);
+    }, 4000);
   });
 
   client.on('text', (packet) => {
@@ -172,17 +144,19 @@ app.get('/api/status', (req, res) => {
     connected: isConnected,
     username: CONFIG.username,
     lastSpawn,
-    logs: logs.slice(-50)
+    logs: logs.slice(-40)
   });
 });
 
 wss.on('connection', (ws) => {
   sendStatus();
-  logs.slice(-30).forEach(l => ws.send(JSON.stringify({ type: 'log', message: l })));
+  logs.slice(-25).forEach(l => {
+    ws.send(JSON.stringify({ type: 'log', message: l }));
+  });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  log(`Dashboard running on port ${PORT}`);
+  log(`Dashboard started on port ${PORT}`);
   connect();
 });
