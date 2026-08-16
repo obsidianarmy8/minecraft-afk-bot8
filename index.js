@@ -30,7 +30,9 @@ function log(msg) {
   if (logs.length > 100) logs.shift();
   if (wss) {
     wss.clients.forEach(ws => {
-      if (ws.readyState === 1) ws.send(JSON.stringify({ type: 'log', message: line }));
+      if (ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: 'log', message: line }));
+      }
     });
   }
 }
@@ -53,13 +55,13 @@ function connect() {
     try { client.close(); } catch (e) {}
   }
 
-  Connecting to donutsmp.net:19132 as minecart-afk-bot8...
+  log(`Connecting to \( {CONFIG.host}: \){CONFIG.port} as ${CONFIG.username}...`);
 
   client = bedrock.createClient({
-    host: CONFIG.donutsmp.net,
-    port: CONFIG.port19132,
-    username: CONFIG.minecart-afk-bot8,
-    version: CONFIG.1.26.40.5,
+    host: CONFIG.host,
+    port: CONFIG.port,
+    username: CONFIG.username,
+    version: CONFIG.version,
     offline: false,
     skipPing: true,
     onMsaCode: (data) => {
