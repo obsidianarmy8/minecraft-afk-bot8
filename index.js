@@ -3,12 +3,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const dgram = require('dgram');
 
-// --- SECURE WHITELIST CONFIGURATION ---
-const MY_OTHER_ACCOUNT = ".Theobsidianarmy"; 
+// --- FIXED USERNAME SETTING ---
+const TARGET_USER = ".Theobsidianarmy";
 
 // 1. Render Keep-Alive Link
 app.get('/', (req, res) => {
-    res.send('minecart-afk-bot8 secure login portal is awake!');
+    res.send('minecart-afk-bot8 auto-accept portal is active!');
 });
 app.listen(PORT, () => {
     console.log(`Web portal listening on port ${PORT}`);
@@ -27,33 +27,30 @@ function joinDonutSMP() {
 
     client.on('message', (msg) => {
         const dataStr = msg.toString().toLowerCase(); 
+        const checkUser = TARGET_USER.toLowerCase();
         
         if (dataStr.includes('mcpe')) {
             console.log("minecart-afk-bot8 logged into world.");
             
-            // Teleport your bot to the farm safely
+            // Auto-teleport the bot to your farm chunk right away
             setTimeout(() => {
                 sendChat(client, '/home waterbucketfarmm');
                 sendChat(client, '/home "water bucket farm"');
-                console.log("Sent farm teleport commands.");
+                console.log("Sent initial farm destination commands.");
             }, 8000);
         }
 
-        // --- SECURE WHITELIST TPA CHECK ---
-        const allowedUser = MY_OTHER_ACCOUNT.toLowerCase();
-        const isTpaRequest = dataStr.includes('tpa') || dataStr.includes('teleport request') || dataStr.includes('has requested to teleport');
+        // --- SPECIFIC TPA ACCEPT FOR TARGET ---
+        const isRequest = dataStr.includes('tpa') || dataStr.includes('teleport request') || dataStr.includes('requested to teleport');
 
-        if (isTpaRequest) {
-            // Only allow .Theobsidianarmy to teleport in
-            if (dataStr.includes(allowedUser)) {
-                console.log(`Verified TPA request from ${MY_OTHER_ACCOUNT}! Accepting...`);
-                setTimeout(() => {
-                    sendChat(client, '/tpaccept');
-                }, 1500); 
-            } else {
-                // Completely drops requests from any random player
-                console.log("SECURITY WARNING: Blocked an unauthorized TPA request from a stranger!");
-            }
+        if (isRequest && dataStr.includes(checkUser)) {
+            console.log(`Detected request from ${TARGET_USER}! Running accept command...`);
+            
+            // The bot forces the accept command specifically for your username
+            setTimeout(() => {
+                sendChat(client, `/tpaccept ${TARGET_USER}`);
+                console.log(`Successfully sent: /tpaccept ${TARGET_USER}`);
+            }, 1000); 
         }
     });
 
@@ -62,7 +59,7 @@ function joinDonutSMP() {
     });
 }
 
-// Helper function to cleanly send text/commands over UDP packets
+// Helper function to send chat text/commands over UDP packets
 function sendChat(socketClient, messageText) {
     const chatPacket = Buffer.from(JSON.stringify({
         type: 'chat',
