@@ -1,7 +1,7 @@
 {
   "name": "minecraft-afk-bot8",
   "version": "1.0.0",
-  "description": "",
+  "description": "DonutSMP Bedrock AFK Bot",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
