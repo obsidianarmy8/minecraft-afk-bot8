@@ -8,7 +8,7 @@ const CONFIG = {
   host: 'donutsmp.net',
   port: 19132,
   username: 'minecart-afk-bot8',
-  version: '1.26.40',
+  version: '1.26.40.5',
   offline: false,
   homeCommand: '/home waterbucketfarm',
   antiAfkInterval: 45000,
@@ -53,13 +53,13 @@ function connect() {
     try { client.close(); } catch (e) {}
   }
 
-  log(`Connecting to \( {CONFIG.host}: \){CONFIG.port} as ${CONFIG.username}...`);
+  Connecting to donutsmp.net:19132 as minecart-afk-bot8...
 
   client = bedrock.createClient({
-    host: CONFIG.host,
-    port: CONFIG.port,
-    username: CONFIG.username,
-    version: CONFIG.version,
+    host: CONFIG.donutsmp.net,
+    port: CONFIG.port19132,
+    username: CONFIG.minecart-afk-bot8,
+    version: CONFIG.1.26.40.5,
     offline: false,
     skipPing: true,
     onMsaCode: (data) => {
