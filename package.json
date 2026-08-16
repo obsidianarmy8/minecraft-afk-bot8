@@ -1,4 +1,4 @@
 "dependencies": {
   "express": "^4.19.2",
-  "bedrock-protocol": "^3.31.0"
+  "minecraft-protocol": "^1.47.0"
 }
